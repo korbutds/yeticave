@@ -2,6 +2,16 @@
 $is_auth = rand(0, 1);
 
 $user_name = 'Korbut Dmitriy'; // укажите здесь ваше имя
+
+$categories = [
+  'boards' => 'Доски и лыжи',
+  'attachment' => 'Крепления',
+  'boots' => 'Ботинки',
+  'clothing' => 'Одежда',
+  'tools' => 'Инструменты',
+  'other' => 'Разное',
+];
+
 ?>
 <!DOCTYPE html>
 <html lang="ru">
