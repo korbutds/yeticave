@@ -46,10 +46,20 @@ $lots = [
   [
     'title' => 'Маска Oakley Canopy',
     'category' => $categories['other'],
-    'price' => 5400,
+    'price' => 540,
     'image' => 'img/lot-6.jpg',
   ],
 ];
+
+function sum_formatting(int $num): string {
+  $num = ceil($num);
+
+  if ($num >= 1000) {
+      $num = number_format($num, 0, '', ' ');
+  }
+
+  return $num . ' ₽';
+}
 
 ?>
 <!DOCTYPE html>
@@ -125,8 +135,8 @@ $lots = [
                     <h3 class="lot__title"><a class="text-link" href="pages/lot.html"><?= $lot['title'] ?></a></h3>
                     <div class="lot__state">
                         <div class="lot__rate">
-                            <span class="lot__amount"><?= $lot['price'] ?></span>
-                            <span class="lot__cost">цена<b class="rub">₽</b></span>
+                            <span class="lot__amount">Стартовая цена</span>
+                            <span class="lot__cost"><?= sum_formatting($lot['price']) ?></span>
                         </div>
                         <div class="lot__timer timer">
                             12:23
