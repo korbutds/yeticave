@@ -143,20 +143,22 @@ function include_template($name, array $data = []) {
     return $result;
 }
 
-function get_dt_range(string $date) {
-  $is_valid = is_date_valid($date);
+function get_time_left(string $date) {
+  date_default_timezone_set('Europe/Moscow');
+  $final_date = date_create($date);
+  $cur_date = date_create();
 
+  $diff = date_diff($final_date, $cur_date);
+  $format_diff = date_interval_format($diff, '%d %H %I');
+  $arr = explode(' ', $format_diff);
 
-  if ($is_valid) {
-    $current_date = time();
-    $diff = strtotime($date) - $current_date;
+  $hours = $arr[0] * 24 + $arr[1];
+  $minutes = intval($arr[2]);
 
-    $hours = str_pad(floor($diff / (60 * 60)), 2, '0', STR_PAD_LEFT);
-    $minutes = str_pad(floor($diff / 60) % 60, 2, '0', STR_PAD_LEFT);
-    return [$hours, $minutes];
-  }
+  $hours = str_pad($hours, 2, '0', STR_PAD_LEFT);
+  $minutes = str_pad($minutes, 2, '0', STR_PAD_LEFT);
 
-  return [];
+  return [$hours, $minutes];
 }
 
 
