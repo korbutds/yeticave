@@ -17,7 +17,7 @@ function is_date_valid(string $date) : bool {
     $format_to_check = 'Y-m-d';
     $dateTimeObj = date_create_from_format($format_to_check, $date);
 
-    return $dateTimeObj !== false && array_sum(date_get_last_errors()) === 0;
+    return $dateTimeObj !== false;
 }
 
 /**
@@ -141,6 +141,22 @@ function include_template($name, array $data = []) {
     $result = ob_get_clean();
 
     return $result;
+}
+
+function get_dt_range(string $date) {
+  $is_valid = is_date_valid($date);
+
+
+  if ($is_valid) {
+    $current_date = time();
+    $diff = strtotime($date) - $current_date;
+
+    $hours = str_pad(floor($diff / (60 * 60)), 2, '0', STR_PAD_LEFT);
+    $minutes = str_pad(floor($diff / 60) % 60, 2, '0', STR_PAD_LEFT);
+    return [$hours, $minutes];
+  }
+
+  return [];
 }
 
 
