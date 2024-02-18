@@ -80,4 +80,22 @@ $layout_content = include_template('layout.php', [
 
 print ($layout_content);
 
-$log = '23';
+$con = mysqli_connect("mysql", "root", "root", "yeticave");
+if (!$con) {
+  print("Ошибка подключения: " . mysqli_connect_error());
+}
+else {
+  mysqli_set_charset($con, "utf8");
+  echo mysqli_character_set_name($con);
+  $sql = "SELECT id, category FROM categories";
+  $result = mysqli_query($con, $sql);
+
+  $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+  var_dump($rows);
+
+  foreach ($rows as $row) {
+    print("Категория: " . $row['category']);
+  }
+  print("Соединение установлено");
+  // выполнение запросов
+}
