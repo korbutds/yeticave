@@ -89,13 +89,15 @@ else {
   echo mysqli_character_set_name($con);
   $sql = "SELECT id, category FROM categories";
   $result = mysqli_query($con, $sql);
+  if (!$result) {
+    $error = mysqli_error($con);
+    print("Ошибка MySQL: " . $error);
+  } else {
+    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    var_dump($rows);
 
-  $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-  var_dump($rows);
-
-  foreach ($rows as $row) {
-    print("Категория: " . $row['category']);
   }
+
   print("Соединение установлено");
   // выполнение запросов
 }
