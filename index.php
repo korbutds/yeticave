@@ -79,3 +79,25 @@ $layout_content = include_template('layout.php', [
 ]);
 
 print ($layout_content);
+
+$con = mysqli_connect("mysql", "root", "root", "yeticave");
+if (!$con) {
+  print("Ошибка подключения: " . mysqli_connect_error());
+}
+else {
+  mysqli_set_charset($con, "utf8");
+  echo mysqli_character_set_name($con);
+  $sql = "SELECT id, category FROM categories";
+  $result = mysqli_query($con, $sql);
+  if (!$result) {
+    $error = mysqli_error($con);
+    print("Ошибка MySQL: " . $error);
+  } else {
+    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    var_dump($rows);
+
+  }
+
+  print("Соединение установлено");
+  // выполнение запросов
+}
