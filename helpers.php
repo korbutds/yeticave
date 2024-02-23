@@ -161,4 +161,15 @@ function get_time_left(string $date) {
   return [$hours, $minutes];
 }
 
+function sum_formatting(int $num): string {
+  $num = ceil($num);
+
+  if ($num >= 1000) {
+    $num = number_format($num, 0, '', ' ');
+  }
+
+  return $num . ' ₽';
+}
+
+
 
