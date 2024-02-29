@@ -4,5 +4,5 @@
 .idea/runConfigurations/*
 !.idea/runConfigurations/JS2PHP_to_Elephize.xml
 !.idea/encodings.xml # per-file/directory encoding settings
-!docker/mysql
-docker/mysql/*
+!docker/*
+docker/**
