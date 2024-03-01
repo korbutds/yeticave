@@ -161,4 +161,9 @@ function get_time_left(string $date) {
   return [$hours, $minutes];
 }
 
+function format_num($num) {
+  $num = ceil($num);
+  return number_format($num, 0, '.', ' ');
+}
+
 
