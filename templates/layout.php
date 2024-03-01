@@ -42,10 +42,7 @@
         </nav>
     </div>
 </header>
-
-
     <?= $content ?>
-</main>
 </div>
 
 <footer class="main-footer">

@@ -15,3 +15,14 @@ LEFT JOIN yeticave.categories c
 ORDER BY date_creation DESC 
 SQL;
 }
+
+function get_lot_info($lot) {
+  return <<<SQL
+    SELECT date_creation, title, lot_description, image, date_finish, start_price, step, category 
+    FROM yeticave.lots l
+    LEFT JOIN yeticave.categories c
+    ON l.category_id=c.id
+    WHERE l.id=$lot;
+SQL;
+
+}
