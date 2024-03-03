@@ -26,12 +26,12 @@
                 $minutes_left = $time_left[1];
             ?>
           <div class="lot-item__timer timer<?php if ($hours_left < 1): ?> timer--finishing<?php endif; ?>">
-            <?= $hours_left ?>:<?= $minutes_left ?>
+            <?= "$hours_left:$minutes_left" ?>
           </div>
           <div class="lot-item__cost-state">
             <div class="lot-item__rate">
               <span class="lot-item__amount">Текущая цена</span>
-              <span class="lot-item__cost">10 999</span>
+              <span class="lot-item__cost"><?= format_num($lot['start_price']) ?> р</span>
             </div>
             <div class="lot-item__min-cost">
               Мин. ставка <span>12 000 р</span>

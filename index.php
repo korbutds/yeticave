@@ -2,7 +2,7 @@
 require_once './utils/helpers.php';
 require_once './utils/model.php';
 require_once './utils/init.php';
-
+header("X-Academy: keks");
 $is_auth = rand(0, 1);
 
 $user_name = 'Korbut Dmitriy';
