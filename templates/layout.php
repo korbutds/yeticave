@@ -5,6 +5,9 @@
     <title><?= $title ?></title>
     <link href="../css/normalize.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
+    <?php if($head):?>
+      <?= $head ?>
+    <?php endif; ?>
 </head>
 <body>
 <div class="page-wrapper">

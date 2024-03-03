@@ -24,5 +24,4 @@ function get_lot_info($lot) {
     ON l.category_id=c.id
     WHERE l.id=$lot;
 SQL;
-
 }
