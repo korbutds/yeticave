@@ -66,12 +66,12 @@ VALUES
 INSERT INTO lots
 (title, lot_description, image, start_price, date_finish, step, user_id, category_id)
 VALUES
-    ('2014 Rossignol District Snowboard', 'Легкий маневренный сноуборд, готовый дать жару в любом парке', 'img/lot-1.jpg', 10999, '2021-08-10', 500, 1, 1),
-    ('DC Ply Mens 2016/2017 Snowboard', 'Легкий маневренный сноуборд, готовый дать жару в любом парке', 'img/lot-2.jpg', 159999, '2021-08-11', 1000, 2, 1),
-    ('Крепления Union Contact Pro 2015 года размер L/XL', 'Хорошие крепления, надежные и легкие', 'img/lot-3.jpg', 8000, '2021-08-12', 500, 2, 2),
-    ('Ботинки для сноуборда DC Mutiny Charocal', 'Теплые и красивые ботинки', 'img/lot-4.jpg', 10999, '2021-08-13', 600, 1, 3),
-    ('Куртка для сноуборда DC Mutiny Charocal', 'Легкая, теплая и прочная куртка', 'img/lot-5.jpg', 7500, '2021-08-14', 500, 1, 4),
-    ('Маска Oakley Canopy', 'Желтые очки, все будет веселенькое', 'img/lot-6.jpg', 5400, '2021-08-15', 100, 1, 6);
+    ('2014 Rossignol District Snowboard', 'Легкий маневренный сноуборд, готовый дать жару в любом парке', 'uploads/img/lot-1.jpg', 10999, '2021-08-10', 500, 1, 1),
+    ('DC Ply Mens 2016/2017 Snowboard', 'Легкий маневренный сноуборд, готовый дать жару в любом парке', 'uploads/img/lot-2.jpg', 159999, '2021-08-11', 1000, 2, 1),
+    ('Крепления Union Contact Pro 2015 года размер L/XL', 'Хорошие крепления, надежные и легкие', 'uploads/img/lot-3.jpg', 8000, '2021-08-12', 500, 2, 2),
+    ('Ботинки для сноуборда DC Mutiny Charocal', 'Теплые и красивые ботинки', 'uploads/img/lot-4.jpg', 10999, '2021-08-13', 600, 1, 3),
+    ('Куртка для сноуборда DC Mutiny Charocal', 'Легкая, теплая и прочная куртка', 'uploads/img/lot-5.jpg', 7500, '2021-08-14', 500, 1, 4),
+    ('Маска Oakley Canopy', 'Желтые очки, все будет веселенькое', 'uploads/img/lot-6.jpg', 5400, '2021-08-15', 100, 1, 6);
 
 INSERT INTO bets
 (price_bet, user_id, lot_id)
@@ -103,3 +103,5 @@ FROM bets
          JOIN users ON bets.user_id=users.id
 WHERE lots.id=4
 ORDER BY bets.date_bet DESC;
+
+SELECT * FROM lots

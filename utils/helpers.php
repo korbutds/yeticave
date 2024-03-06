@@ -42,7 +42,7 @@ function db_get_prepare_stmt($link, $sql, $data = []) {
         $stmt_data = [];
 
         foreach ($data as $value) {
-            $type = 's';
+            $type = null;
 
             if (is_int($value)) {
                 $type = 'i';

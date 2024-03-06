@@ -16,7 +16,7 @@ $sql = get_categories_sql_query();
 $categories_res = mysqli_query($con, $sql);
 $categories = mysqli_fetch_all($categories_res, MYSQLI_ASSOC);
 
-$id = filter_input(INPUT_GET, 'lot', FILTER_SANITIZE_NUMBER_INT);
+$id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 $page_404 = include_template('404.php', [
   'categories' => $categories
 ]);

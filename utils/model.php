@@ -2,7 +2,7 @@
 
 function get_categories_sql_query() {
   return <<<SQL
-SELECT category, character_code as category_code FROM yeticave.categories
+SELECT id, category, character_code as category_code FROM yeticave.categories
 SQL;
 }
 

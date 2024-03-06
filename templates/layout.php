@@ -5,7 +5,7 @@
     <title><?= $title ?></title>
     <link href="../css/normalize.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
-    <?php if($head):?>
+    <?php if(isset($head)):?>
       <?= $head ?>
     <?php endif; ?>
 </head>

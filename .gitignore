@@ -6,3 +6,4 @@
 !.idea/encodings.xml # per-file/directory encoding settings
 !docker/*
 docker/**
+uploads
