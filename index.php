@@ -1,57 +1,33 @@
 <?php
-require_once './utils/helpers.php';
-require_once './utils/model.php';
-require_once './utils/init.php';
-header("X-Academy: keks");
-$is_auth = rand(0, 1);
-
-$user_name = 'Korbut Dmitriy';
-$title = 'Main page';
+require_once("./utils/helpers.php");
+require_once("./utils/functions.php");
+require_once("./utils/data.php");
+require_once("./utils/init.php");
+require_once("./utils/models.php");
 
 
-if (!$con) {
-  $error = mysqli_connect_error();
-  print('Не удалось подключитсья к БД');
-  exit;
+$categories = get_categories($con);
+
+$sql = get_query_list_lots ('2021-07-15');
+
+$res = mysqli_query($con, $sql);
+if ($res) {
+  $goods = get_arrow($res);
+} else {
+  $error = mysqli_error($con);
 }
 
-$sql = get_categories_sql_query();
-$cat_req = mysqli_query($con, $sql);
-$categories = mysqli_fetch_all($cat_req, MYSQLI_ASSOC);
-
-$sql = get_lots_sql_query();
-$lot_req = mysqli_query($con, $sql);
-$lots = mysqli_fetch_all($lot_req, MYSQLI_ASSOC);
-
-
-$page_content = include_template('main.php', ['categories' => $categories , 'lots' => $lots]);
-$layout_content = include_template('layout.php', [
-  'is_auth' => $is_auth,
-  'title' => $title,
-  'user_name' => $user_name,
-  'content' => $page_content,
-  'categories' => $categories,
+$page_content = include_template("main.php", [
+  "categories" => $categories,
+  "goods" => $goods
+]);
+$layout_content = include_template("layout.php", [
+  "content" => $page_content,
+  "categories" => $categories,
+  "title" => "Главная",
+  "is_auth" => $is_auth,
+  "user_name" => $user_name
 ]);
 
-print ($layout_content);
-
-//$con = mysqli_connect("mysql", "root", "root", "yeticave");
-//if (!$con) {
-//  print("Ошибка подключения: " . mysqli_connect_error());
-//}
-//else {
-//  mysqli_set_charset($con, "utf8");
-//  echo mysqli_character_set_name($con);
-//  $sql = "SELECT id, category FROM categories";
-//  $result = mysqli_query($con, $sql);
-//  if (!$result) {
-//    $error = mysqli_error($con);
-//    print("Ошибка MySQL: " . $error);
-//  } else {
-//    $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
-//  }
-//
-//  print("Соединение установлено");
-//   выполнение запросов
-//}
+print($layout_content);
 

@@ -1,52 +1,47 @@
 <?php
-include_once './utils/helpers.php';
-include_once './utils/model.php';
-include_once './utils/init.php';
+require_once("./utils/helpers.php");
+require_once("./utils/functions.php");
+require_once("./utils/data.php");
+require_once("./utils/init.php");
+require_once("./utils/models.php");
 
-$is_auth = rand(0, 1);
+$categories = get_categories($con);
 
-$user_name = 'Korbut Dmitriy';
-$title = 'Main page';
-
-if (!$con) {
-  die('error');
-}
-
-$sql = get_categories_sql_query();
-$categories_res = mysqli_query($con, $sql);
-$categories = mysqli_fetch_all($categories_res, MYSQLI_ASSOC);
+$page_404 = include_template("404.php", [
+  "categories" => $categories
+]);
 
 $id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
-$page_404 = include_template('404.php', [
-  'categories' => $categories
-]);
+if ($id) {
+  $sql = get_query_lot ($id);
+} else {
+  print($page_404);
+  die();
+};
 
-if (!$id) {
+$res = mysqli_query($con, $sql);
+if ($res) {
+  $lot = get_arrow($res);
+} else {
+  $error = mysqli_error($con);
+}
+
+if(!$lot) {
   print($page_404);
   die();
 }
 
-$sql = get_lot_info($id);
-$lots_res = mysqli_query($con, $sql);
-$lot = mysqli_fetch_assoc($lots_res);
 
-if (!$lot) {
-  print($page_404);
-  die();
-}
-
-$content = include_template('lot_info.php', [
+$page_content = include_template("main-lot.php", [
   "categories" => $categories,
-  "lot" => $lot,
+  "lot" => $lot
+]);
+$layout_content = include_template("layout-lot.php", [
+  "content" => $page_content,
+  "categories" => $categories,
+  "title" => $lot["title"],
+  "is_auth" => $is_auth,
+  "user_name" => $user_name
 ]);
 
-$layout_content = include_template('layout.php', [
-  'is_auth' => $is_auth,
-  'title' => $title,
-  'user_name' => $user_name,
-  'content' => $content,
-  'categories' => $categories,
-]);
-
-print ($layout_content);
-
+print($layout_content);

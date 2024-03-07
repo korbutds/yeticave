@@ -13,24 +13,11 @@
  *
  * @return bool true при совпадении с форматом 'ГГГГ-ММ-ДД', иначе false
  */
-function is_date_valid(string $date) {
-    $format_to_check = 'Y-m-d';
-    $dateTimeObj = date_create_from_format($format_to_check, $date);
-    $targetDate = new DateTime('2022-01-01');
-    $today = new DateTime(); // Текущая дата и время
+function is_date_valid(string $date) : bool {
+  $format_to_check = 'Y-m-d';
+  $dateTimeObj = date_create_from_format($format_to_check, $date);
 
-    $interval = $today->diff($targetDate);
-    $days = $interval->format("%a");
-
-    if ($dateTimeObj === false) {
-      return 'Содержимое поля «дата завершения» должно быть датой в формате «ГГГГ-ММ-ДД».';
-    }
-
-    if ($days < 1) {
-      return 'Дата должна быть больше текущей даты, хотя бы на один день.';
-    }
-
-    return null;
+  return $dateTimeObj !== false && array_sum(date_get_last_errors()) === 0;
 }
 
 /**
@@ -43,48 +30,46 @@ function is_date_valid(string $date) {
  * @return mysqli_stmt Подготовленное выражение
  */
 function db_get_prepare_stmt($link, $sql, $data = []) {
-    $stmt = mysqli_prepare($link, $sql);
+  $stmt = mysqli_prepare($link, $sql);
 
-    if ($stmt === false) {
-        $errorMsg = 'Не удалось инициализировать подготовленное выражение: ' . mysqli_error($link);
-        die($errorMsg);
+  if ($stmt === false) {
+    $errorMsg = 'Не удалось инициализировать подготовленное выражение: ' . mysqli_error($link);
+    die($errorMsg);
+  }
+
+  if ($data) {
+    $types = '';
+    $stmt_data = [];
+
+    foreach ($data as $value) {
+      $type = 's';
+
+      if (is_int($value)) {
+        $type = 'i';
+      }
+      else if (is_string($value)) {
+        $type = 's';
+      }
+      else if (is_double($value)) {
+        $type = 'd';
+      }
+
+      if ($type) {
+        $types .= $type;
+        $stmt_data[] = $value;
+      }
     }
 
-    if ($data) {
-        $types = '';
-        $stmt_data = [];
+    $values = array_merge([$stmt, $types], $stmt_data);
+    mysqli_stmt_bind_param(...$values);
 
-        foreach ($data as $value) {
-            $type = null;
-
-            if (is_int($value)) {
-                $type = 'i';
-            }
-            else if (is_string($value)) {
-                $type = 's';
-            }
-            else if (is_double($value)) {
-                $type = 'd';
-            }
-
-            if ($type) {
-                $types .= $type;
-                $stmt_data[] = $value;
-            }
-        }
-
-        $values = array_merge([$stmt, $types], $stmt_data);
-
-        $func = 'mysqli_stmt_bind_param';
-        $func(...$values);
-
-        if (mysqli_errno($link) > 0) {
-            $errorMsg = 'Не удалось связать подготовленное выражение с параметрами: ' . mysqli_error($link);
-            die($errorMsg);
-        }
+    if (mysqli_errno($link) > 0) {
+      $errorMsg = 'Не удалось связать подготовленное выражение с параметрами: ' . mysqli_error($link);
+      die($errorMsg);
     }
+  }
 
-    return $stmt;
+  return $stmt;
 }
 
 /**
@@ -111,26 +96,26 @@ function db_get_prepare_stmt($link, $sql, $data = []) {
  */
 function get_noun_plural_form (int $number, string $one, string $two, string $many): string
 {
-    $number = (int) $number;
-    $mod10 = $number % 10;
-    $mod100 = $number % 100;
+  $number = (int) $number;
+  $mod10 = $number % 10;
+  $mod100 = $number % 100;
 
-    switch (true) {
-        case ($mod100 >= 11 && $mod100 <= 20):
-            return $many;
+  switch (true) {
+    case ($mod100 >= 11 && $mod100 <= 20):
+      return $many;
 
-        case ($mod10 > 5):
-            return $many;
+    case ($mod10 > 5):
+      return $many;
 
-        case ($mod10 === 1):
-            return $one;
+    case ($mod10 === 1):
+      return $one;
 
-        case ($mod10 >= 2 && $mod10 <= 4):
-            return $two;
+    case ($mod10 >= 2 && $mod10 <= 4):
+      return $two;
 
-        default:
-            return $many;
-    }
+    default:
+      return $many;
+  }
 }
 
 /**
@@ -140,66 +125,18 @@ function get_noun_plural_form (int $number, string $one, string $two, string $ma
  * @return string Итоговый HTML
  */
 function include_template($name, array $data = []) {
-    $name = 'templates/' . $name;
-    $result = '';
+  $name = 'templates/' . $name;
+  $result = '';
 
-    if (!is_readable($name)) {
-        return $result;
-    }
-
-    ob_start();
-    extract($data);
-    require $name;
-
-    $result = ob_get_clean();
-
+  if (!is_readable($name)) {
     return $result;
-}
-
-function get_time_left(string $date) {
-  date_default_timezone_set('Europe/Moscow');
-  $final_date = date_create($date);
-  $cur_date = date_create();
-
-  $diff = date_diff($final_date, $cur_date);
-  $format_diff = date_interval_format($diff, '%d %H %I');
-  $arr = explode(' ', $format_diff);
-
-  $hours = $arr[0] * 24 + $arr[1];
-  $minutes = intval($arr[2]);
-
-  $hours = str_pad($hours, 2, '0', STR_PAD_LEFT);
-  $minutes = str_pad($minutes, 2, '0', STR_PAD_LEFT);
-
-  return [$hours, $minutes];
-}
-
-function format_num($num) {
-  $num = ceil($num);
-  return number_format($num, 0, '.', ' ');
-}
-
-function validate_category($value, $cats_ids) {
-  if (!in_array($value, $cats_ids)) {
-    return 'Вы ввели несуществующую категорию';
-  };
-  return null;
-}
-
-function validate_step($value) {
-  if (!is_int($value) || $value < 1) {
-    return 'Шаг ставки должен быть целым, положительным числом';
   }
-  return null;
-}
 
-function validate_price($value) {
-  if (!is_numeric($value) || $value < 1) {
-    return 'Содержимое поля «начальная цена» должно быть числом больше нуля.';
-  }
-  return null;
-}
+  ob_start();
+  extract($data);
+  require $name;
 
-function get_post_val($name) {
-  return filter_input(INPUT_POST, $name);
+  $result = ob_get_clean();
+
+  return $result;
 }

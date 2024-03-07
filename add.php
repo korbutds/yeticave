@@ -1,120 +1,115 @@
 <?php
-include_once './utils/helpers.php';
-include_once './utils/model.php';
-include_once './utils/init.php';
+require_once("./utils/helpers.php");
+require_once("./utils/functions.php");
+require_once("./utils/data.php");
+require_once("./utils/init.php");
+require_once("./utils/models.php");
 
 
-if (!$con) {
-  die('No connection');
-}
+$categories = get_categories($con);
+$categories_id = array_column($categories, "id");
+$lot = [];
 
-$sql = get_categories_sql_query();
-$categories_req = mysqli_query($con, $sql);
-$categories = mysqli_fetch_all($categories_req, MYSQLI_ASSOC);
-$cats_ids = array_column($categories, 'id');
+$page_content = include_template("main-add.php", [
+  "categories" => $categories
+]);
 
-$errors = [];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $required_fields = ['lot-name', 'category', 'message', 'lot-rate', 'lot-step', 'lot-date'];
+  $required = ["lot-name", "category", "message", "lot-rate", "lot-step", "lot-date"];
+  $errors = [];
+
   $rules = [
-    'category' => function ($value) use ($cats_ids) {
-      return validate_category($value, $cats_ids);
+    "category" => function($value) use ($categories_id) {
+      return validate_category($value, $categories_id);
     },
-    'lot-rate' => function ($value) {
-      return validate_price($value);
+    "lot-rate" => function($value) {
+      return validate_number ($value);
     },
-    'lot-step' => function ($value) {
-      return validate_step($value);
+    "lot-step" => function($value) {
+      return validate_number ($value);
     },
-    'lot-data' => function ($value) {
-      return is_date_valid($value);
+    "lot-date" => function($value) {
+      return validate_date ($value);
     }
   ];
 
-  $fields = [
-    'lot-name' => FILTER_UNSAFE_RAW,
-    'category' => FILTER_UNSAFE_RAW,
-    'message' => FILTER_UNSAFE_RAW,
-    'lot-rate' => FILTER_UNSAFE_RAW,
-    'lot-step' => FILTER_UNSAFE_RAW,
-    'lot-date' => FILTER_UNSAFE_RAW,
-  ];
-  $lot = filter_input_array(INPUT_POST, $fields, true);
+  $lot = filter_input_array(INPUT_POST,
+    [
+      "lot-name"=>FILTER_DEFAULT,
+      "category"=>FILTER_DEFAULT,
+      "message"=>FILTER_DEFAULT,
+      "lot-rate"=>FILTER_DEFAULT,
+      "lot-step"=>FILTER_DEFAULT,
+      "lot-date"=>FILTER_DEFAULT
+    ], true);
 
-  foreach ($lot as $key => $value) {
-    if (isset($rules[$key])) {
-      $rule = $rules[$key];
-      $errors[$key] = $rule($value);
+  foreach ($lot as $field => $value) {
+    if (isset($rules[$field])) {
+      $rule = $rules[$field];
+      $errors[$field] = $rule($value);
     }
-
-    if (in_array($key, $required_fields) && empty($value)) {
-      $errors[$key] = "Поле нужно заполнить";
+    if (in_array($field, $required) && empty($value)) {
+      $errors[$field] = "Поле $field нужно заполнить";
     }
   }
 
   $errors = array_filter($errors);
 
-  $lot_image = $_FILES['lot'];
+  if (!empty($_FILES["lot_img"]["name"])) {
+    $tmp_name = $_FILES["lot_img"]["tmp_name"];
+    $path = $_FILES["lot_img"]["name"];
 
-  if (!empty($lot_image['tmp_name'])) {
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $file_type = finfo_file($finfo, $lot_image['tmp_name']);
-
-    if ($file_type !== 'image/jpeg' && $file_type !== 'image/png') {
-      $errors['image'] = 'Загрузи картинку в формате jpeg или png';
+    $file_type = finfo_file($finfo, $tmp_name);
+    if ($file_type === "image/jpeg") {
+      $ext = ".jpg";
+    } else if ($file_type === "image/png") {
+      $ext = ".png";
+    };
+    if ($ext) {
+      $filename = uniqid() . $ext;
+      $lot["path"] = "uploads/". $filename;
+      move_uploaded_file($_FILES["lot_img"]["tmp_name"], "uploads/". $filename);
     } else {
-      $ext = '.jpg';
-      if ($file_type === 'image/png') {
-        $ext = '.png';
-      }
-
-      $file_name = uniqid() . $ext;
-      $file_path = __DIR__ . '/uploads/img/';
-      $file_url = '/uploads/img/' . $file_name;
-      move_uploaded_file($lot_image['tmp_name'], $file_path . $file_name);
-      $lot['image'] = $file_url;
-      $sql = 'INSERT INTO yeticave.lots (title, category_id, lot_description, start_price, step, date_creation, date_finish, user_id, image) VALUES ( ?, ?, ?, ?, ?, NOW(), ?, 1, ?)';
-      $stmt = db_get_prepare_stmt($con, $sql, $lot);
-      $res = mysqli_stmt_execute($stmt);
-
-      if ($res) {
-        $lot_id = mysqli_insert_id($con);
-        header('Location: lot.php?id=' . $lot_id);
-      }
+      $errors["lot_img"] = "Допустимые форматы файлов: jpg, jpeg, png";
     }
   } else {
-    $errors['image'] = 'Необходимо загрузить изображение';
+    $errors["lot_img"] = "Вы не загрузили изображение";
   }
-} else {
-  $content = include_template('add_lot.php', [
-    'categories' => $categories,
-  ]);
+
+  if (count($errors)) {
+    $page_content = include_template("main-add.php", [
+      "categories" => $categories,
+      "lot" => $lot,
+      "errors" => $errors
+    ]);
+  } else {
+    $sql = get_query_create_lot(2);
+    $stmt = db_get_prepare_stmt_version($con, $sql, $lot);
+    $res = mysqli_stmt_execute($stmt);
+
+
+    if ($res) {
+      $lot_id = mysqli_insert_id($con);
+      header("Location: /lot.php?id=" .$lot_id);
+    } else {
+      $error = mysqli_error($con);
+    }
+  }
 }
 
-if (count($errors)) {
-  $content = include_template('add_lot.php', [
-    'categories' => $categories,
-    'errors' => $errors,
-  ]);
-}
-
-$is_auth = rand(0, 1);
-
-$user_name = 'Korbut Dmitriy';
-$title = 'Main page';
-$head = '<link href="/css/flatpickr.min.css" rel="stylesheet" />';
-
-$sql = get_categories_sql_query();
-$categories_req = mysqli_query($con, $sql);
-$categories = mysqli_fetch_all($categories_req, MYSQLI_ASSOC);
-
-$layout_content = include_template('layout.php', [
-  'is_auth' => $is_auth,
-  'title' => $title,
-  'user_name' => $user_name,
-  'content' => $content,
-  'categories' => $categories,
-  'head' => $head,
+$page_head = include_template("head.php", [
+  "title" => "Добавить лот"
+]);
+$layout_content = include_template("layout-add.php", [
+  "content" => $page_content,
+  "categories" => $categories,
+  "is_auth" => $is_auth,
+  "user_name" => $user_name
 ]);
 
+
+print($page_head);
 print($layout_content);
+
