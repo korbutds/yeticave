@@ -13,11 +13,24 @@
  *
  * @return bool true при совпадении с форматом 'ГГГГ-ММ-ДД', иначе false
  */
-function is_date_valid(string $date) : bool {
+function is_date_valid(string $date) {
     $format_to_check = 'Y-m-d';
     $dateTimeObj = date_create_from_format($format_to_check, $date);
+    $targetDate = new DateTime('2022-01-01');
+    $today = new DateTime(); // Текущая дата и время
 
-    return $dateTimeObj !== false;
+    $interval = $today->diff($targetDate);
+    $days = $interval->format("%a");
+
+    if ($dateTimeObj === false) {
+      return 'Содержимое поля «дата завершения» должно быть датой в формате «ГГГГ-ММ-ДД».';
+    }
+
+    if ($days < 1) {
+      return 'Дата должна быть больше текущей даты, хотя бы на один день.';
+    }
+
+    return null;
 }
 
 /**
@@ -166,4 +179,27 @@ function format_num($num) {
   return number_format($num, 0, '.', ' ');
 }
 
+function validate_category($value, $cats_ids) {
+  if (!in_array($value, $cats_ids)) {
+    return 'Вы ввели несуществующую категорию';
+  };
+  return null;
+}
 
+function validate_step($value) {
+  if (!is_int($value) || $value < 1) {
+    return 'Шаг ставки должен быть целым, положительным числом';
+  }
+  return null;
+}
+
+function validate_price($value) {
+  if (!is_numeric($value) || $value < 1) {
+    return 'Содержимое поля «начальная цена» должно быть числом больше нуля.';
+  }
+  return null;
+}
+
+function get_post_val($name) {
+  return filter_input(INPUT_POST, $name);
+}
