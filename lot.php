@@ -5,29 +5,43 @@ require_once("./utils/data.php");
 require_once("./utils/init.php");
 require_once("./utils/models.php");
 
-
 $categories = get_categories($con);
 
-$sql = get_query_list_lots ('2021-07-15');
+$page_404 = include_template("404.php", [
+  "categories" => $categories
+]);
+
+$id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+if ($id) {
+  $sql = get_query_lot ($id);
+} else {
+  print($page_404);
+  die();
+};
 
 $res = mysqli_query($con, $sql);
 if ($res) {
-  $goods = get_arrow($res);
+  $lot = get_arrow($res);
 } else {
   $error = mysqli_error($con);
 }
 
-$page_content = include_template("main.php", [
+if(!$lot) {
+  print($page_404);
+  die();
+}
+
+
+$page_content = include_template("main-lot.php", [
   "categories" => $categories,
-  "goods" => $goods
+  "lot" => $lot
 ]);
-$layout_content = include_template("layout.php", [
+$layout_content = include_template("layout-lot.php", [
   "content" => $page_content,
   "categories" => $categories,
-  "title" => "Главная",
+  "title" => $lot["title"],
   "is_auth" => $is_auth,
   "user_name" => $user_name
 ]);
 
 print($layout_content);
-
